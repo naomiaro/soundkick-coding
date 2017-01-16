@@ -6,9 +6,7 @@ from bs4 import BeautifulSoup
 def scrape_page(url):
     r = requests.get(url)
     soup = BeautifulSoup(r.text, 'html.parser')
-
     event_links = soup.find_all('a', ['event_link'])
-
     parsedData = []
 
     for link in event_links:
@@ -19,7 +17,13 @@ def scrape_page(url):
         venue = event_soup.find_all('div', ['venue-details'])
 
         venue_details = venue[0].h2.text
-        [city, venue_name] = venue_details.split(':')
+        venue_split = venue_details.split(':')
+
+        if len(venue_split) > 1:
+            [city, venue_name] = venue_split
+        else:
+            city = venue_split[0]
+            venue_name = venue_split[0]
 
         event = link.parent.parent
 
@@ -44,3 +48,7 @@ if __name__ == '__main__':
 
     [parsedData, next_link] = scrape_page('http://www.wegottickets.com/searchresults/all')
     dump_concerts(parsedData)
+
+    while(len(next_link)):
+        [parsedData, next_link] = scrape_page(next_link[0].attrs['href'])
+        dump_concerts(parsedData)
