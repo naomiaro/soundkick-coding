@@ -17,13 +17,12 @@ def scrape_page(url):
         venue = event_soup.find_all('div', ['venue-details'])
 
         venue_details = venue[0].h2.text
-        venue_split = venue_details.split(':')
 
-        if len(venue_split) > 1:
-            [city, venue_name] = venue_split
-        else:
-            city = venue_split[0]
-            venue_name = venue_split[0]
+        try:
+            [city, venue_name] = venue_details.split(':')
+        except Exception:
+            city = venue_details
+            venue_name = venue_details
 
         event = link.parent.parent
 
