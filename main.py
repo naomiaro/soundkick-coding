@@ -21,13 +21,21 @@ if __name__ == '__main__':
         event_request = requests.get(link.attrs['href'])
         event_soup = BeautifulSoup(event_request.text, 'html.parser')
 
-        name = event_soup.find_all('div', ['event-information'])
+        info = event_soup.find_all('div', ['event-information'])
         venue = event_soup.find_all('div', ['venue-details'])
 
+        venue_details = venue[0].h2.text
+        [city, venue_name] = venue_details.split(':')
+
+        event = link.parent.parent
+
         parsedData.append({
-            'name': name[0].h1.text,
+            'name': info[0].h1.text,
             'date': venue[0].h4.text,
-            'venue': venue[0].h2.text
+            'venue': venue_name,
+            'city': city,
+            'artists': info[0].h4.text,
+            'price': event.find_all('div', ['searchResultsPrice'])[0].text
         })
 
 
