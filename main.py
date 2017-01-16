@@ -13,11 +13,30 @@ def parse_venue_location(location):
 
     return [city, venue_name]
 
+
 def extract_venue_details(venue):
     venue_details = venue[0].h2.text
     [city, venue_name] = parse_venue_location(venue_details)
 
     return [city, venue_name, venue[0].h4.text]
+
+
+def scrape_event(url):
+    event_request = requests.get(url)
+    event_soup = BeautifulSoup(event_request.text, 'html.parser')
+
+    info = event_soup.find_all('div', ['event-information'])
+    venue = event_soup.find_all('div', ['venue-details'])
+
+    [city, venue_name, date] = extract_venue_details(venue)
+
+    return {
+        'name': info[0].h1.text,
+        'date': date,
+        'venue': venue_name,
+        'city': city,
+        'artists': info[0].h4.text
+    }
 
 
 def scrape_page(url):
@@ -27,37 +46,28 @@ def scrape_page(url):
     parsedData = []
 
     for link in event_links:
-        event_request = requests.get(link.attrs['href'])
-        event_soup = BeautifulSoup(event_request.text, 'html.parser')
+        data = scrape_event(link.attrs['href'])
 
-        info = event_soup.find_all('div', ['event-information'])
-        venue = event_soup.find_all('div', ['venue-details'])
-
-        [city, venue_name, date] = extract_venue_details()
-
+        #it's easier to get the price from the listings
         event = link.parent.parent
-
         try:
             price = event.find_all('div', ['searchResultsPrice'])[0].text
         except Exception:
             price = '??'
 
-        parsedData.append({
-            'name': info[0].h1.text,
-            'date': date,
-            'venue': venue_name,
-            'city': city,
-            'artists': info[0].h4.text,
-            'price': price
-        })
+        data['price'] = price
+        parsedData.append(data)
 
     next_link = soup.find_all('a', ['nextlink'])
 
     return [parsedData, next_link]
 
+
 def dump_concerts(data):
     with open('concert.json', 'a') as outfile:
         json.dump(parsedData, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+
+
 
 if __name__ == '__main__':
 
