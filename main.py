@@ -2,15 +2,9 @@ import requests
 import json
 from bs4 import BeautifulSoup
 
-#artists playing
-#city
-#name of the venue
-#date
-#price
 
-if __name__ == '__main__':
-
-    r = requests.get('http://www.wegottickets.com/searchresults/all')
+def scrape_page(url):
+    r = requests.get(url)
     soup = BeautifulSoup(r.text, 'html.parser')
 
     event_links = soup.find_all('a', ['event_link'])
@@ -38,11 +32,15 @@ if __name__ == '__main__':
             'price': event.find_all('div', ['searchResultsPrice'])[0].text
         })
 
-
-    with open('concert.json', 'w') as outfile:
-        json.dump(parsedData, outfile, sort_keys=True, indent=4, ensure_ascii=False)
-
-
     next_link = soup.find_all('a', ['nextlink'])
 
-    print(next_link[0].attrs['href'])
+    return [parsedData, next_link]
+
+def dump_concerts(data):
+    with open('concert.json', 'a') as outfile:
+        json.dump(parsedData, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+
+if __name__ == '__main__':
+
+    [parsedData, next_link] = scrape_page('http://www.wegottickets.com/searchresults/all')
+    dump_concerts(parsedData)
