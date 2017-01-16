@@ -2,6 +2,21 @@ import requests
 import json
 from bs4 import BeautifulSoup
 
+def parse_venue_location(location):
+    try:
+        [city, venue_name] = location.split(':')
+    except Exception:
+        city = location
+        venue_name = location
+
+    return [city, venue_name]
+
+def extract_venue_details(venue):
+    venue_details = venue[0].h2.text
+    [city, venue_name] = parse_venue_location(venue_details)
+
+    return [city, venue_name, venue[0].h4.text]
+
 
 def scrape_page(url):
     r = requests.get(url)
@@ -16,23 +31,22 @@ def scrape_page(url):
         info = event_soup.find_all('div', ['event-information'])
         venue = event_soup.find_all('div', ['venue-details'])
 
-        venue_details = venue[0].h2.text
-
-        try:
-            [city, venue_name] = venue_details.split(':')
-        except Exception:
-            city = venue_details
-            venue_name = venue_details
+        [city, venue_name, date] = extract_venue_details(venue)
 
         event = link.parent.parent
 
+        try:
+            price = event.find_all('div', ['searchResultsPrice'])[0].text
+        except Exception:
+            price = '??'
+
         parsedData.append({
             'name': info[0].h1.text,
-            'date': venue[0].h4.text,
+            'date': date,
             'venue': venue_name,
             'city': city,
             'artists': info[0].h4.text,
-            'price': event.find_all('div', ['searchResultsPrice'])[0].text
+            'price': price
         })
 
     next_link = soup.find_all('a', ['nextlink'])
