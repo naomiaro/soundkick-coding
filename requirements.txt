@@ -1,2 +1,6 @@
 beautifulsoup4==4.5.3
+linecache2==1.0.0
 requests==2.12.4
+six==1.10.0
+traceback2==1.4.0
+unittest2==1.1.0

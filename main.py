@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 def parse_venue_location(location):
     try:
         [city, venue_name] = location.split(':')
+        city = city.strip()
+        venue_name = venue_name.strip()
     except Exception:
         city = location
         venue_name = location
@@ -31,7 +33,7 @@ def scrape_page(url):
         info = event_soup.find_all('div', ['event-information'])
         venue = event_soup.find_all('div', ['venue-details'])
 
-        [city, venue_name, date] = extract_venue_details(venue)
+        [city, venue_name, date] = extract_venue_details()
 
         event = link.parent.parent
 
