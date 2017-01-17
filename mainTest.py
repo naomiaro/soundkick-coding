@@ -1,6 +1,5 @@
 import unittest2
 import main as scraper
-from bs4 import BeautifulSoup
 
 class Test(unittest2.TestCase):
 
