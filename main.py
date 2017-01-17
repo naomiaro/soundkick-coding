@@ -21,9 +21,8 @@ def extract_venue_details(venue):
     return [city, venue_name, venue[0].h4.text]
 
 
-def scrape_event(url):
-    event_request = requests.get(url)
-    event_soup = BeautifulSoup(event_request.text, 'html.parser')
+def parse_event(text):
+    event_soup = BeautifulSoup(text, 'html.parser')
 
     info = event_soup.find_all('div', ['event-information'])
     venue = event_soup.find_all('div', ['venue-details'])
@@ -37,6 +36,11 @@ def scrape_event(url):
         'city': city,
         'artists': info[0].h4.text
     }
+
+def scrape_event(url):
+    event_request = requests.get(url)
+    
+    return parse_event
 
 
 def scrape_page(url):
